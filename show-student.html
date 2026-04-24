@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Student Records</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0e11;
+    --surface: #1a1820;
+    --border: #2e2b38;
+    --accent: #7c6af7;
+    --accent-glow: rgba(124,106,247,0.18);
+    --text: #f0eeff;
+    --muted: #7d7a8f;
+    --row-hover: rgba(124,106,247,0.07);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 3rem 2rem;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(124,106,247,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  .top-bar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2.4rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: #a99fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 0.8rem;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    padding: 0.65rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(124,106,247,0.3);
+    transition: opacity 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .add-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* Search + filter bar */
+  .controls {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.4rem;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 1rem 0.7rem 2.4rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-wrap input::placeholder { color: var(--muted); opacity: 0.6; }
+  .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+  select.filter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 2.2rem 0.7rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d7a8f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  select.filter:focus { border-color: var(--accent); outline: none; }
+  select.filter option { background: #1a1820; }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.4rem;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .stat-card .label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+  .stat-card .value { font-size: 1.6rem; font-family: 'DM Serif Display', serif; color: var(--text); }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr {
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    text-align: left;
+    padding: 0.85rem 1.2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(46,43,56,0.6);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--row-hover); }
+
+  td {
+    padding: 1rem 1.2rem;
+    font-size: 0.9rem;
+    vertical-align: middle;
+  }
+
+  .roll-badge {
+    display: inline-block;
+    background: var(--accent-glow);
+    border: 1px solid rgba(124,106,247,0.25);
+    color: #a99fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+
+  .course-pill {
+    display: inline-block;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* Empty / loading states */
+  .state-msg {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+  }
+
+  .state-msg .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+  .state-msg p { font-size: 0.9rem; }
+
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid rgba(124,106,247,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.65rem 1rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .refresh-btn:hover { border-color: var(--accent); color: var(--text); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-bar">
+    <div>
+      <div class="badge">Student Portal</div>
+      <h1>Student Records</h1>
+    </div>
+    <div style="display:flex;gap:0.8rem;align-items:center">
+      <button class="refresh-btn" onclick="loadStudents()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        Refresh
+      </button>
+      <a href="add_student.html" class="add-btn">+ Add Student</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="label">Total Students</div>
+      <div class="value" id="totalCount">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Courses</div>
+      <div class="value" id="courseCount">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Showing</div>
+      <div class="value" id="showingCount">—</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search by name or roll number…" oninput="filterTable()"/>
+    </div>
+    <select class="filter" id="courseFilter" onchange="filterTable()">
+      <option value="">All Courses</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Roll No.</th>
+          <th>Student Name</th>
+          <th>Course</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="4">
+          <div class="state-msg">
+            <div class="spinner"></div>
+            <p>Loading student records…</p>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  // ⚙️ Change this to your ALB or backend URL
+  const API_URL = "http://your-alb-url.elb.amazonaws.com";
+
+  let allStudents = [];
+
+  async function loadStudents() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = `<tr><td colspan="4"><div class="state-msg"><div class="spinner"></div><p>Loading…</p></div></td></tr>`;
+
+    try {
+      const res = await fetch(`${API_URL}/api/students`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      allStudents = await res.json();
+
+      // Populate course filter
+      const courses = [...new Set(allStudents.map(s => s.course))].sort();
+      const filter = document.getElementById('courseFilter');
+      filter.innerHTML = '<option value="">All Courses</option>';
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        filter.appendChild(opt);
+      });
+
+      // Update stats
+      document.getElementById('totalCount').textContent = allStudents.length;
+      document.getElementById('courseCount').textContent = courses.length;
+
+      filterTable();
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="4"><div class="state-msg"><div class="icon">⚠️</div><p>${err.message || 'Could not load data.'}</p></div></td></tr>`;
+      document.getElementById('totalCount').textContent = '—';
+      document.getElementById('courseCount').textContent = '—';
+      document.getElementById('showingCount').textContent = '—';
+    }
+  }
+
+  function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const course = document.getElementById('courseFilter').value;
+    const tbody  = document.getElementById('tableBody');
+
+    const filtered = allStudents.filter(s => {
+      const matchSearch = s.name.toLowerCase().includes(search) || s.roll_no.toLowerCase().includes(search);
+      const matchCourse = !course || s.course === course;
+      return matchSearch && matchCourse;
+    });
+
+    document.getElementById('showingCount').textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4"><div class="state-msg"><div class="icon">🔍</div><p>No students match your search.</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map((s, i) => `
+      <tr>
+        <td style="color:var(--muted);font-size:0.82rem">${i + 1}</td>
+        <td><span class="roll-badge">${escHtml(s.roll_no)}</span></td>
+        <td style="font-weight:500">${escHtml(s.name)}</td>
+        <td><span class="course-pill">${escHtml(s.course)}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  loadStudents();
+</script>
+</body>
+</html>

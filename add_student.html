@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Add Student</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0e11;
+    --surface: #1a1820;
+    --border: #2e2b38;
+    --accent: #7c6af7;
+    --accent-glow: rgba(124,106,247,0.18);
+    --text: #f0eeff;
+    --muted: #7d7a8f;
+    --success: #4ade80;
+    --error: #f87171;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(124,106,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.8rem 3rem;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(124,106,247,0.3), transparent 50%);
+    z-index: -1;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: #a99fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 1.2rem;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 2.2rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.4rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  input, select {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.78rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+    appearance: none;
+  }
+
+  input::placeholder { color: var(--muted); opacity: 0.6; }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    background: rgba(124,106,247,0.06);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d7a8f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  select option { background: #1a1820; }
+
+  .btn {
+    width: 100%;
+    padding: 0.88rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.6rem;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(124,106,247,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(124,106,247,0.45); }
+  .btn:active { transform: translateY(0); }
+
+  .btn.loading { pointer-events: none; opacity: 0.7; }
+  .btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+  .toast {
+    display: none;
+    margin-top: 1.2rem;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .toast.success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: var(--success); display: flex; align-items: center; gap: 8px; }
+  .toast.error   { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: var(--error);   display: flex; align-items: center; gap: 8px; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .footer-link {
+    text-align: center;
+    margin-top: 1.6rem;
+    font-size: 0.83rem;
+    color: var(--muted);
+  }
+
+  .footer-link a {
+    color: #a99fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .footer-link a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="badge">Student Portal</div>
+  <h1>Add Student</h1>
+  <p class="subtitle">Fill in the details below to enroll a new student.</p>
+
+  <form id="studentForm">
+    <div class="form-group">
+      <label for="roll_no">Roll Number</label>
+      <input type="text" id="roll_no" name="roll_no" placeholder="e.g. CS2024001" required/>
+    </div>
+
+    <div class="form-group">
+      <label for="name">Student Name</label>
+      <input type="text" id="name" name="name" placeholder="Full name" required/>
+    </div>
+
+    <div class="form-group">
+      <label for="course">Course Name</label>
+      <select id="course" name="course" required>
+        <option value="" disabled selected>Select a course</option>
+        <option>Computer Science</option>
+        <option>Electronics Engineering</option>
+        <option>Mechanical Engineering</option>
+        <option>Civil Engineering</option>
+        <option>Business Administration</option>
+        <option>Data Science</option>
+        <option>Cybersecurity</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn" id="submitBtn">Enroll Student</button>
+  </form>
+
+  <div class="toast" id="toast"></div>
+
+  <p class="footer-link">View all students → <a href="students.html">Student Records</a></p>
+</div>
+
+<script>
+  // ⚙️ Change this to your ALB or backend URL
+  const API_URL = "http://your-alb-url.elb.amazonaws.com";
+
+  const form = document.getElementById('studentForm');
+  const btn  = document.getElementById('submitBtn');
+  const toast = document.getElementById('toast');
+
+  function showToast(type, message) {
+    toast.className = `toast ${type}`;
+    toast.innerHTML = (type === 'success' ? '✓ ' : '✕ ') + message;
+    toast.style.display = 'flex';
+    setTimeout(() => { toast.style.display = 'none'; }, 4000);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+      roll_no: document.getElementById('roll_no').value.trim(),
+      name:    document.getElementById('name').value.trim(),
+      course:  document.getElementById('course').value,
+    };
+
+    btn.classList.add('loading');
+    btn.textContent = '';
+
+    try {
+      const res = await fetch(`${API_URL}/api/students`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error('Server error: ' + res.status);
+
+      showToast('success', 'Student enrolled successfully!');
+      form.reset();
+    } catch (err) {
+      showToast('error', err.message || 'Failed to add student.');
+    } finally {
+      btn.classList.remove('loading');
+      btn.textContent = 'Enroll Student';
+    }
+  });
+</script>
+</body>
+</html>
